@@ -1,28 +1,40 @@
-
-
 public class Point {
-	private int x;
-	private int y;
 	
-	public Point(int a, int b){
-		x=a;
-		y=b;
+	private int abs;
+	private int ord;
+	
+	
+	public Point (int a, int b){
+		abs = a;
+		ord = b;
 	}
-	public Point(){
-		x=0;
-		y=0;
+
+	public Point (){
+		abs = 0;
+		ord = 0;
 	}
-	public int abs(){
-		return x;
+
+	public int abscisse(){
+		return abs;
 	}
-	public int ord(){
-		return y;
+
+	public int ordonne(){
+		return ord;
 	}
-	public void setPoint(int ab, int or){
-		x=ab;
-		y=or;
+	
+	public void setAbscisse(int ab){
+		abs=ab;
 	}
+	
+	public void setOrdonne(int or){
+		ord=or;
+	}
+	
 	public String toString(){
-		return "("+this.abs()+";"+this.ord()+")";
+		return ("abscisse: " + abs + " " + " ordonnée: " + ord);
 	}
+	
+	
 }
+
+
