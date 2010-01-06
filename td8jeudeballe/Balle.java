@@ -31,8 +31,8 @@ public class Balle{
 	
 	// déplace le point d’origine de la balle en (x,y)
 	public void deplacer(int x, int y){
-		orig.setAbscisse(x-11);
-		orig.setOrdonne(y-10);
+		orig.setAbscisse(x-(diametre/2));
+		orig.setOrdonne(y-(diametre/2));
 	}	
 	
 	// teste si le point (x,y) est dans la balle ou non
@@ -47,7 +47,7 @@ public class Balle{
 	
 	//Permet d'avoir une distance plus réaliste, en prenant l'origine non pas en haut à gauche mais au milieu de la balle principale
 	public double distance2(Point p){
-		return Math.sqrt( (p.abscisse() - orig.abscisse()-10)*(p.abscisse() - orig.abscisse()-10) + (p.ordonne() - orig.ordonne()-10)*(p.ordonne() - orig.ordonne()-10));
+		return Math.sqrt( (p.abscisse() - orig.abscisse()-(diametre/2))*(p.abscisse() - orig.abscisse()-(diametre/2)) + (p.ordonne() - orig.ordonne()-(diametre/2))*(p.ordonne() - orig.ordonne()-(diametre/2)));
 	}
 	
 	// dessine la balle dans le Graphics g

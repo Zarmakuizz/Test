@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Random;
+import java.lang.Math;
 
 public class Case{
 
@@ -15,11 +16,11 @@ public class Case{
 	private static Graphics g;
 	private Random r;
 	//Utile pour l'extension de mouvement
-	private boolean XX; //Si la case va à gauche ou à droite
-	private boolean XY; //Si la case fait un mvt horizontal ou vertical
-	private boolean XYZ; //Si la case fait un mvt oblique ou pas
 	private boolean T; //Si la case fait un mvt aléatoire frénétique spécial ou pas
+	private boolean XYZ; //Si la case fait un mvt oblique ou pas
 	private int XXZ; //Quelle est la direction de la case dans le cas d'un mouvement oblique
+	private boolean XY; //Si la case fait un mvt horizontal ou vertical
+	private boolean XX; //Si la case va à gauche/en haut ou à droite/en bas
 	
 	//Variables utiles pour le mode légendaire
 	private boolean isRoundRect; //Permet de faire appel aux graphiques spéciaux
@@ -41,77 +42,70 @@ public class Case{
 		coteCase = cote;
 		nbCase = cases;
 		nbObstacles = obstacles; 
-		hauteurPic=14; angle=0;
-		isRoundRect=false;
+		hauteurPic=coteCase/2; 
+		angle=0;
+		isRoundRect=false; // Ne pas activer les graphismes spéciaux (réservés au mode légendaire)
 		r = new Random();
 		
-		
-		int rand1=r.nextInt(3);
-		if(rand1 == 1) XYZ = true;
-		else XYZ = false;
-		
-		int rand2=r.nextInt(4);
-		if(rand2 == 1) T = true;
+		//Déterminer aléatoirement le comportement de la case
+		// Mouvement oblique ?
+		if(r.nextInt(3) == 1){
+			XYZ = true;
+			XXZ = r.nextInt(4); // Le sens du mouvement
+		} else XYZ = false;
+		// Mouvement tremblant ?
+		if(r.nextInt(4) == 1) T = true;
 		else T = false;
+		// Mouvement dans quel axe ?
+		XY = r.nextBoolean();
+		// Mouvement dans quel sens ?
+		XX = r.nextBoolean();
 		
-		XXZ = r.nextInt(4);
-		
-		if(r.nextInt(2) == 1) XY = true;
-		else XY = false;
-		
-		if(r.nextInt(2) == 1) XX = true;
-		else XX = false;
-		
+		// Aucune case, dans le mode Légendaire, n'a déjà déployé ses pics avant le début de la partie
+		L = false;
 		LL = 0;
 		
-		L = false;
-		
-		
-		
 	}
-
 	
 /********************************** Accesseurs *********************************************/
-
 	public Point origine() {
 		return orig;
 	}
 	
-	//Renvoid la taille courante de la case
 	public int getTailleCase(){
 		if(!isRoundRect) return coteCase;
 		else return (int)(hauteurPic*1.3);
 	}
 
-/*********************************** Mutateurs *********************************************/	
+/*********************************** Modificateurs *********************************************/	
 
 	public void setOrig(int x, int y) {
 		orig.setAbscisse(x);
 		orig.setOrdonne(y);
 	}
 	
-/******************************** Bouger : facile et normal *********************************/	
+/*********************** Bouger : mouvements horizontaux/verticaux à partir de facile ***********************/	
 	
 	//Sert pour le mouvement de difficulté facile et normale
 	public void bougerXY(){
 	
-		if(XY){ //Mouvement Horizontal
-			//Permet d'éviter les parois horizontales
+		if(XY){ // En cas de mouvement horizontal
+			// Changer le mouvement si la case "touche" une paroi
 			if (orig.abscisse() > coteCase*(nbCase-1)) XX = false;
 			if (orig.abscisse() < 0) XX = true;
-			//Pour éviter les cases de départ et d'arrivée+
+			//Pour éviter les cases de départ et d'arrivée
 			if ((orig.abscisse()<(getTailleCase()+1) && orig.ordonne()<=1) || (orig.abscisse()>coteCase*(nbCase-2)+1 && orig.ordonne()>coteCase*(nbCase-1))){
 				if(XX) XX = false;
 				else XX = true;
 			}
-			//Déplacement
+			// Régler le sens du mouvement
 			if (XX)
 				orig.setAbscisse(orig.abscisse()+1*UNITE); //Vers la gauche
 			else
 				orig.setAbscisse(orig.abscisse()-1*UNITE); //Vers la droite
 		}
-		else { //Mouvement vertical
-			//Permet d'éviter les parois verticales
+		else { // En cas de mouvement vertical
+			// Changer le mouvement si la case "touche" une paroi
 			if (orig.ordonne() > coteCase*(nbCase-1)) XX = false;
 			if (orig.ordonne() < 0) XX = true;
 			//Pour éviter les cases de départ et d'arrivée
@@ -119,7 +113,7 @@ public class Case{
 				if(XX) XX = false;
 				else XX = true;
 			}
-			//Déplacement
+			// Régler le sens du mouvement
 			if (XX)
 				orig.setOrdonne(orig.ordonne()+1*UNITE); //Vers le haut
 			else
@@ -127,7 +121,7 @@ public class Case{
 		}
 	}
 
-/******************************** Bouger : difficile ***************************************/	
+/*********************** Bouger : mouvement oblique ajouté à partir de difficile **************************/	
 
 	//Utile pour bouger une case dans une direction oblique
 	public void bougerOblique(int direction){
@@ -139,9 +133,9 @@ public class Case{
 		}
 	}
 	
-	//Sert pour le mouvement de difficulté difficile
+	//Sert pour le mouvement de difficulté Difficile
 	public void bougerXYZ(){
-		// 1/3 des cases bougeront de amnière oblique
+		// 1/3 des cases bougeront de manière oblique
 		if (XYZ){
 			//Pour éviter les cases de départ et d'arrivée
 			if(orig.ordonne()<=1 && orig.abscisse()<=getTailleCase()+2){
@@ -174,8 +168,8 @@ public class Case{
 				else{ //Vers haut-droite
 					bougerOblique(1); XXZ = 1;
 				}			
-				//Pour alternet un peu le sens de déplacement
-				if (r.nextInt(2)==1) XX = !(XX);
+				//Pour alterner un peu le sens de déplacement
+				if (r.nextBoolean()) XX = !(XX);
 			}
 			//Paroi droite
 			else if(orig.abscisse()>=coteCase*(nbCase-1)){
@@ -185,7 +179,7 @@ public class Case{
 				else{ //Vers bas-gauche
 					bougerOblique(3); XXZ = 3;
 				}	
-				if (r.nextInt(2)==1) XX = !(XX);
+				if (r.nextBoolean()) XX = !(XX);
 			}
 			//Paroi haut
 			else if(orig.ordonne()<=0){
@@ -195,7 +189,7 @@ public class Case{
 				else{ //Vers bas-droite
 					bougerOblique(0); XXZ = 0;
 				}
-				if (r.nextInt(2)==1) XX = !(XX);
+				if (r.nextBoolean()) XX = !(XX);
 			}
 			//Paroi bas
 			else if(orig.ordonne()>=coteCase*(nbCase-1)){
@@ -205,23 +199,10 @@ public class Case{
 				else{ //Vers haut-gauche
 					bougerOblique(2); XXZ = 2;
 				}	
-				if (r.nextInt(2)==1) XX = !(XX);
+				if (r.nextBoolean()) XX = !(XX);
 			}
-			
-			//Les 4 directions obliques
-			else if(XXZ==0){
-				bougerOblique(0);
-			}
-			else if(XXZ==1){
-				bougerOblique(1);
-			}
-			else if(XXZ==2){
-				bougerOblique(2);
-			}
-			else if(XXZ==3){
-				bougerOblique(3);
-			}
-			
+			// Sinon on continue le même mouvement que précédemment 
+			else bougerOblique(XXZ);
 		}
 		// 2/3 des cases bougeront horizontalement ou verticalement
 		else{
@@ -229,7 +210,7 @@ public class Case{
 		}
 	}
 	
-/******************************** Bouger : légendaire ******************************************/	
+/************************* Bouger : changement de forme des cases pour Légendaire ***************************/	
 	
 	public void pics(){
 		isRoundRect=true; //permet d'activer la fonction spéciale dans la fonction dessiner
@@ -278,22 +259,19 @@ public class Case{
 	
 	//Sert pour le mouvement de difficulté légendaire
 	public void bougerL(){
-		//UNITE = 2; //histoire de multiplier par 2 les déplacements
 		//Si la case est déjà en cours de déploiment de pics on continue
 		if(L){
 			pics();
+		//Sinon si aucune autre case n'est en cours de déploiment de pics, on donne une chance de l'être pendant un moment
+		} else if(r.nextInt(300)==1){ //1 chance sur 300, pour éviter d'avoir trop de pics à l'écran
+				pics();
 		}
-		//Sinon si aucune autre case n'est en cours de déploiment de pics, on donne une chance de l'être
-		else{
-			if(r.nextInt(300)==1){ //1 chance sur 300 d'être une case spéciale pendant un moment
-					pics();
-			}
-		}
-		bougerXYZ();
+		bougerXYZ(); // La case doit continuer à se mouvoir
 	}
 	
 	//Permet de dessiner un pic sur une case pour le mode légendaire
 	public void dessinerUnPic(int base1X, int base1Y, int base2X, int base2Y, double picX, double picY, Graphics g){
+	// Retenir les coordonnées de chacun des 3 points du pic (un triangle) à dessiner
 		int[] coordonneX = {(orig.abscisse()+coteCase/2)+base1X, (orig.abscisse()+coteCase/2)+base2X, (orig.abscisse()+coteCase/2)+(int)(hauteurPic*picX)};
 		int[] coordonneY = {(orig.ordonne()+coteCase/2)+base1Y, (orig.ordonne()+coteCase/2)+base2Y, (orig.ordonne()+coteCase/2)+(int)(hauteurPic*picY)};
 		g.fillPolygon(coordonneX, coordonneY, 3);
@@ -328,7 +306,7 @@ public class Case{
 	//Utile pour bouger une case dans une direction oblique rapidement + changement de la taille des cases
 	public void bougerBizarre(int direction){
 		int var=0;
-		if(r.nextInt(20)==2) var=1; //Une fois sur 20 on augmente la taille de la case
+		if(r.nextInt(20)==0) var=1; //Une fois sur 20 on augmente la taille de la case
 		switch(direction){
 			case 0: orig.setAbscisse(orig.abscisse()+r.nextInt(4));
 			orig.setOrdonne(orig.ordonne()+r.nextInt(4)); 
@@ -346,6 +324,7 @@ public class Case{
 			orig.setOrdonne(orig.ordonne()+r.nextInt(4)); 
 			largeur+=var; longueur+=var; break;
 		}
+			
 	}
 	
 	//Sert pour le mouvement de difficulté contre la montre
@@ -358,20 +337,8 @@ public class Case{
 			if(orig.abscisse()>coteCase*(nbCase-1)) orig.setAbscisse(coteCase*(nbCase-1));
 			if(orig.ordonne()>largeur*(nbCase-1)) orig.setOrdonne(largeur*(nbCase-1));
 			
-			int rand1=r.nextInt(4);
 			//Mouvements aléatoires frénétiques
-			if(rand1==0){
-				bougerBizarre(0);
-			}
-			else if(rand1==1){
-				bougerBizarre(1);
-			}
-			else if(rand1==2){
-				bougerBizarre(2);
-			}
-			else if(rand1==3){
-				bougerBizarre(3);
-			}
+			bougerBizarre(r.nextInt(4));
 			
 		}
 		// 3/4 des cases bougeront horizontalement, verticalement, ou de manière oblique
@@ -380,7 +347,7 @@ public class Case{
 		}
 	}
 
-/************************************ dessiner ***************************************************/	
+/************************************ dessiner **********************************************/	
 	
 	//Permet de dessiner la case
 	public void dessiner(Graphics g){
@@ -389,7 +356,7 @@ public class Case{
 			g.fillRoundRect(orig.abscisse(), orig.ordonne(), largeur, longueur, angle, angle);
 			dessinerPics(g);
 		}
-		else{ //Cases carrées classiques
+		else{ //Dans le cas de cases carrées classiques
 			g.fillRect(orig.abscisse(), orig.ordonne(), largeur, longueur);
 		}
 	}

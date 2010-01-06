@@ -22,7 +22,7 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 	private boolean stop; private boolean exit=false;
 	private Image offscreen; //Utile pour le double buffering
 	private Graphics og;
-	private Thread thread; //Utile pour faire avancer les cases indépendament
+	private Thread thread; //Utile pour faire avancer les cases indépendamment
 	private Random r;
 	private Case arrivee;
 	private Balle ball;
@@ -76,30 +76,30 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 /********************************** Run (thread) **************************************/
 
 	//Se lance automatiquement dès que le thread est démarré
+	// Le thread sert pour tous les niveaux de difficulté où les cases bougent : facile et supérieur
 	public void run(){
 		while(true){
-			if (!stop){
-				//gagné
+			if (!stop){ // Si la partie est encore en marche
+				// En cas de victoire
 				if(ball.appartient(arrivee.origine().abscisse(), arrivee.origine().ordonne())){
 					String typeDifficulte="";
 					switch(type){
-						case 1: typeDifficulte = "Facile"; break;
-						case 2: typeDifficulte = "Normal"; break;
-						case 3: typeDifficulte = "Difficile"; break;
-						case 4: typeDifficulte = "Légendaire"; break;
-						case 5: typeDifficulte = "Contre la montre"; break;
+						case 1: typeDifficulte = "Facile !"; break;
+						case 2: typeDifficulte = "Normal !"; break;
+						case 3: typeDifficulte = "Difficile !"; break;
+						case 4: typeDifficulte = "Légendaire !"; break;
+						case 5: typeDifficulte = "Apocalypse !"; break;
 					}
-					JOptionPane.showMessageDialog(this, "Vous avez gagné la partie ! en mode : " + typeDifficulte);
+					JOptionPane.showMessageDialog(this, "Vous avez gagné la partie en mode : " + typeDifficulte);
 					if(type == 3 || type == 4){
 						JOptionPane.showMessageDialog(this, "Le mot de passe pour le niveau caché est : toast");
 					}
-					
-					stop = true;
+					stop = true; 
 					ball.setColor(Color.blue);
 					repaint();
 				}
 				for(Case c : lesObstacles){
-					//perdu
+					// En cas de défaite
 					if(ball.distance(new Point(c.origine().abscisse(), c.origine().ordonne())) < c.getTailleCase()){
 						JOptionPane.showMessageDialog(this, "Vous avez perdu la partie !");
 						stop = true;
@@ -109,6 +109,7 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 					}
 				}
 			}
+			// Maintenir le mouvement des obstacles
 			for(int j=0; j<lesObstacles.length; j++){
 				if(type==1 || type==2) lesObstacles[j].bougerXY();
 				else if(type==3) lesObstacles[j].bougerXYZ();
@@ -133,20 +134,20 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 
 	public void mouseDragged(MouseEvent e){
 		if (!stop && !exit){
-			//On déplace
+			//Si la souris est pressée et a cliqué au bon endroit
 			ball.deplacer(e.getX(), e.getY());
 				
-				if (type == 0){//Si la difficulté est super facile, on fait le test ici
+				if (type == 0){//Si on gagne en mode Super Facile
 					if(ball.appartient(arrivee.origine().abscisse(), arrivee.origine().ordonne())){
-						JOptionPane.showMessageDialog(this, "Vous avez gagné la partie ! en mode : Très Facile...");
+						JOptionPane.showMessageDialog(this, "Vous avez gagné la partie en mode : Très Facile...");
 						stop = true;
 						ball.setColor(Color.blue);
 						repaint();
 					}
 					for(Case c : lesObstacles){
-						//perdu
+						// Si on perd en mode Super Facile
 						if(ball.distance(new Point(c.origine().abscisse(), c.origine().ordonne())) < c.getTailleCase()){
-							JOptionPane.showMessageDialog(this, "Vous avez perdu la partie !");
+							JOptionPane.showMessageDialog(this, "Vous avez perdu la partie alors que vous étiez en mode Super Facile, êtes-vous sûr que votre souris marche bien ?");
 							stop = true;
 							ball.setColor(Color.red);
 							repaint();
@@ -204,12 +205,12 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 		paint(g);
 	}
 	
-/*********************************** Paint ***********************************************/
+/******************************** Paint : double buffering ****************************************/
 	
 	//Permet d'afficher les éléments
 	public void paint(Graphics g){
 		
-		//On crée l'image qu'on affichera
+		//On crée l'image à afficher
 		if(offscreen == null) {
 			offscreen = createImage(getSize().width, getSize().height);
 		}
@@ -217,28 +218,27 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 		og = offscreen.getGraphics();
 		og.setClip(0,0,getSize().width, getSize().height);
 		 
-		//Le fond
+		// On crée le fond
 		og.setColor(Color.black);
 		og.fillRect(0, 0, COTECASE*largeurDamier, COTECASE*longueurDamier);
 		
-		//Lignes verticales
+		// Tracer les lignes verticales
 		for(int i=0; i<largeurDamier; i++){
 			og.setColor(Color.gray);
 			og.drawLine(COTECASE*i, 0, COTECASE*i, COTECASE*longueurDamier);
 		}
-		//Lignes horizontales
+		// Tracer les lignes horizontales
 		for(int j=0; j<longueurDamier; j++){
 			og.setColor(Color.gray);
 			og.drawLine(0, COTECASE*j, COTECASE*longueurDamier, COTECASE*j);
 		}
-		//Les objets
+		// Tracer les objets
 		for(int k=0; k<lesObstacles.length; k++){
 			lesObstacles[k].dessiner(og);
 		}
 		arrivee.dessiner(og);
 		ball.dessiner(og);
 		
-		//super.paint(og);
 		g.drawImage(offscreen, 0, 0, null);
 		og.dispose();//on vide le Graphics
 
