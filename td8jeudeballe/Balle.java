@@ -20,6 +20,9 @@ public class Balle{
 		fond = c;
 	}
 	
+	public int getDiametre(){
+		return diametre;
+	}
 	public Point getOrig() {
 		return orig;
 	}

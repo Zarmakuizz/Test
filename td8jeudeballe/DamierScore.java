@@ -84,7 +84,7 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 		while(true){
 			if (!stop){ // Si la partie est encore en marche
 				// Lorsqu'on touche une pierre
-				if(ball.distance2(new Point(pierre.getOrig().abscisse(), pierre.getOrig().ordonne()))< COTECASE-8){
+				if(ball.distance2(new Point(pierre.getOrig().abscisse(), pierre.getOrig().ordonne()))< pierre.getDiametre()){
 					score++;
 					genererPierre(); //On génère déjà la pierre suivante
 					initCase();
