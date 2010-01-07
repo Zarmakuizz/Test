@@ -301,12 +301,13 @@ public class Case{
 		dessinerUnPic(0, -3, 0, 3, -1, 0, g);
 	}
 	
-/******************************** Bouger : Contre la montre **************************************/	
+/****************************** Bouger : en difficulté Apocalypse ***********************************/	
 	
 	//Utile pour bouger une case dans une direction oblique rapidement + changement de la taille des cases
 	public void bougerBizarre(int direction){
 		int var=0;
-		if(r.nextInt(20)==0) var=1; //Une fois sur 20 on augmente la taille de la case
+		if(r.nextInt(20)==0) var=2; //Une fois sur 20 on augmente la taille de la case
+//		else if (r.nextInt( (int)(1000*Math.exp(0.0-largeur/coteCase)) )==0) largeur=(int)(largeur*0.2); longueur=(int)(longueur*0.2); // Plus la case est grosse, plus elle a de chances de rapetissir
 		switch(direction){
 			case 0: orig.setAbscisse(orig.abscisse()+r.nextInt(4));
 			orig.setOrdonne(orig.ordonne()+r.nextInt(4)); 
