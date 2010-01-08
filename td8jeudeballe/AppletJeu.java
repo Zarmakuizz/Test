@@ -19,7 +19,7 @@ public class AppletJeu extends Applet implements ActionListener {
 	private static Panel p5;
 	private static Label regle;
 	private static Label regle2;
-//Permet de recommancer la partie quel que soit le mode de jeu
+//Permet de recommencer la partie quel que soit le mode de jeu
 	private static Button recommencer;
 //Bouton de choix du mode de jeu
 	private static boolean modeActuel=true; //Permet de savoir le mode actuel de jeu

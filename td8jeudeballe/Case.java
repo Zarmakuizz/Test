@@ -7,7 +7,7 @@ public class Case{
 
 	//Attributs
 	private int coteCase;//COTECASE qu'on récupère de Damier
-	private int UNITE = 1; //Permet de doubler ou pas la vitesse
+	private int UNITE = 1; //Permet de doubler ou pas la vitesse, pour une fonctionnalité à venir
 	private int nbObstacles; //NBOBSTACLES qu'on récupère de Damier
 	private int nbCase; //nombre de cases par côté de la grille
 	protected Color fond;
@@ -16,9 +16,9 @@ public class Case{
 	private static Graphics g;
 	private Random r;
 	//Utile pour l'extension de mouvement
-	private boolean T; //Si la case fait un mvt aléatoire frénétique spécial ou pas
-	private boolean XYZ; //Si la case fait un mvt oblique ou pas
-	private int XXZ; //Quelle est la direction de la case dans le cas d'un mouvement oblique
+	private boolean T; //Si la case fait un mouvement aléatoire frénétique spécial ou pas
+	private boolean XYZ; //Si la case fait un mouvement oblique ou pas
+	private int XXZ; //Indique la direction de la case dans le cas d'un mouvement oblique
 	private boolean XY; //Si la case fait un mvt horizontal ou vertical
 	private boolean XX; //Si la case va à gauche/en haut ou à droite/en bas
 	
@@ -48,15 +48,15 @@ public class Case{
 		r = new Random();
 		
 		//Déterminer aléatoirement le comportement de la case
-		// Mouvement oblique ?
+		// Mouvement oblique ? En Difficile et supérieurs, minoritaire devant le mouvement tremblant
 		if(r.nextInt(3) == 1){
 			XYZ = true;
 			XXZ = r.nextInt(4); // Le sens du mouvement
 		} else XYZ = false;
-		// Mouvement tremblant ?
+		// Mouvement tremblant ? Uniquement en mode Apocalypse
 		if(r.nextInt(4) == 1) T = true;
 		else T = false;
-		// Mouvement dans quel axe ?
+		// Mouvement dans quel axe ? Minoritaire devant les mouvements précédents
 		XY = r.nextBoolean();
 		// Mouvement dans quel sens ?
 		XX = r.nextBoolean();
@@ -263,7 +263,7 @@ public class Case{
 		if(L){
 			pics();
 		//Sinon si aucune autre case n'est en cours de déploiment de pics, on donne une chance de l'être pendant un moment
-		} else if(r.nextInt(300)==1){ //1 chance sur 300, pour éviter d'avoir trop de pics à l'écran
+		} else if(r.nextInt(300)==1){ //1 chance sur 300 à chaque appel de bougerL, pour éviter d'avoir trop de pics à l'écran
 				pics();
 		}
 		bougerXYZ(); // La case doit continuer à se mouvoir
@@ -307,7 +307,6 @@ public class Case{
 	public void bougerBizarre(int direction){
 		int var=0;
 		if(r.nextInt(20)==0) var=2; //Une fois sur 20 on augmente la taille de la case
-//		else if (r.nextInt( (int)(1000*Math.exp(0.0-largeur/coteCase)) )==0) largeur=(int)(largeur*0.2); longueur=(int)(longueur*0.2); // Plus la case est grosse, plus elle a de chances de rapetissir
 		switch(direction){
 			case 0: orig.setAbscisse(orig.abscisse()+r.nextInt(4));
 			orig.setOrdonne(orig.ordonne()+r.nextInt(4)); 
@@ -328,9 +327,8 @@ public class Case{
 			
 	}
 	
-	//Sert pour le mouvement de difficulté contre la montre
+	//Sert pour le mouvement de difficulté Apocalypse
 	public void bougerT(){
-		//UNITE = 2; //histoire de multiplier par 2 les déplacements
 		// 1/4 des cases bougeront de la nouvelle manière
 		if (T){
 			if(orig.abscisse()<0) orig.setAbscisse(0);
